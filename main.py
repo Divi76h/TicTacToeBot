@@ -7,8 +7,27 @@ class TicTacToe:
         self.boardStatus = np.full(shape=(3, 3), fill_value="-")
         self.asciiStart = 65
 
-        self.player = "X" if random.randrange(2) == 0 else "O"
-        self.computer = "X" if self.player == "O" else "O"
+        while True:
+            try:
+                option = int(input("1) X: plays first\n"
+                                   "2) O: plays second\n"
+                                   "3) Random\n"
+                                   "What do you want to play as: "))
+                if 0 < option < 4:
+                    break
+                else:
+                    print("option can only be 1, 2 or 3")
+            except:
+                print("invalid option")
+        if option == 1:
+            self.player = "X"
+            self.computer = "O"
+        elif option == 2:
+            self.player = "O"
+            self.computer = "X"
+        elif option == 3:
+            self.player = "X" if random.randrange(2) == 0 else "O"
+            self.computer = "X" if self.player == "O" else "O"
 
         self.playersLastMove = None
         self.computersLastMove = None
@@ -87,14 +106,16 @@ class TicTacToe:
 
         gameover = self.Xwins or self.Owins or self.tie
 
-        if self.computer == "X" and self.Xwins:
-            print("Computer wins as 'X'")
-        elif self.computer == "O" and self.Owins:
-            print('O wins')
-        elif self.player == "X" and self.Xwins:
-            print("Computer wins as 'X'")
-        elif self.player == "O" and self.Owins:
-            print('O wins')
+        if self.computer == 'X':
+            if self.Xwins:
+                print("Computer wins as 'X'")
+            elif self.Owins:
+                print("Player wins as 'O'")
+        elif self.computer == 'O':
+            if self.Owins:
+                print("Computer wins as 'O'")
+            elif self.Xwins:
+                print("Player wins as 'X'")
         elif self.tie:
             print('Its a tie')
 
@@ -116,7 +137,7 @@ class TicTacToe:
 
     def Input(self):
         while True:
-            position = input("enter position where do you want to play: ")
+            position = input("enter position where you want to play: ")
             try:
                 if len(position) == 3:
                     position = self.InputCheck(position.split(" "))
@@ -233,7 +254,7 @@ class TicTacToe:
                 return [1, 1]
             elif self.isPlayerFirstMoveCorner and self.turn == 2 and self.playersLastMove in self.corners:
                 return random.choice(self.EmptyEdges())
-            elif self.turn == 1 and self.playersLastMove == [1,1]:
+            elif self.turn == 1 and self.playersLastMove == [1, 1]:
                 return random.choice(self.EmptyCorners())
             else:
                 return self.RandomPlay()
@@ -248,14 +269,15 @@ class TicTacToe:
         elif canPlayerWin_PositionToWin[0]:
             self.Move(canPlayerWin_PositionToWin[1], self.computer)
         else:
-            # print("\ntrying")
+            # print("\trying")
             position = self.BestPlay()
             # print("No error")
             # print("best calculated move:", position)
             self.computersLastMove = position
             self.Move(position, self.computer)
+
     def Start(self):
-        print("computer starts" if self.player == "O" else "player starts")
+        print("\ncomputer starts" if self.player == "O" else "\nplayer starts")
         if self.computer == "X":
             pass
         else:
