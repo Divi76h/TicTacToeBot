@@ -56,7 +56,6 @@ class TicTacToe:
                                                   ((2, 2), (2, 1)): (0, 2), ((2, 2), (1, 2)): (2, 0)}
 
     def Display(self):
-        # First row
         print()
         print("  ", end='')
         for j in range(len(self.boardStatus)):
@@ -64,7 +63,6 @@ class TicTacToe:
         print("| ")
         print(f'{(4 * 4) * "-"}')
 
-        # Other rows
         for i in range(len(self.boardStatus)):
             print(f"{chr(self.asciiStart + i)} ", end='')
             for j in range(3):
@@ -263,7 +261,6 @@ class TicTacToe:
 
     def Computer(self):
         canComputerWin_PositionToWin = self.CanWin_PositionToWin(self.computer)
-        # print("Can Computer Win:", canComputerWin_PositionToWin)
         canPlayerWin_PositionToWin = self.CanWin_PositionToWin(self.player)
 
         if canComputerWin_PositionToWin[0]:
@@ -271,10 +268,7 @@ class TicTacToe:
         elif canPlayerWin_PositionToWin[0]:
             self.Move(canPlayerWin_PositionToWin[1], self.computer)
         else:
-            # print("\trying")
             position = self.BestPlay()
-            # print("No error")
-            # print("best calculated move:", position)
             self.computersLastMove = position
             self.Move(position, self.computer)
 
