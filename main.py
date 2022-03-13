@@ -114,7 +114,7 @@ class TicTacToe:
                 print("Computer wins as 'O'")
             elif self.Xwins:
                 print("Player wins as 'X'")
-        elif self.tie:
+        if self.tie:
             print('Its a tie')
 
         return gameover
