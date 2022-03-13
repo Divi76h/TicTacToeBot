@@ -7,7 +7,7 @@ class TicTacToe:
         self.boardStatus = np.full(shape=(3, 3), fill_value="-")
         self.asciiStart = 65
 
-        self.player = "X" if random.randrange(10) == 0 else "O"
+        self.player = "X" if random.randrange(2) == 0 else "O"
         self.computer = "X" if self.player == "O" else "O"
 
         self.playersLastMove = None
@@ -23,8 +23,11 @@ class TicTacToe:
         self.Owins = False
 
         self.playerPlayAdjToComputer = False
+        self.isPlayerFirstMoveCorner = False
 
         self.corners = [[0, 0], [0, 2], [2, 0], [2, 2]]
+        self.edges = [[0, 1], [1, 0], [1, 2], [2, 1]]
+
         self.oppCornerDict = {(0, 0): (2, 2), (0, 2): (2, 0)}
         self.computerCornerAdj = {(0, 0): ([0, 1], [1, 0]), (0, 2): ([0, 1], [1, 2]),
                                   (2, 0): ([1, 0], [2, 1]), (2, 2): ([2, 1], [1, 2])}
@@ -50,16 +53,6 @@ class TicTacToe:
             print("| ")
             print(f'{(4 * 4) * "-"}')
 
-    def IsBoardFilled(self):
-        for row in self.boardStatus:
-            for item in row:
-                if item == '-':
-                    return False
-        return True
-
-    def IsPositionOccupied(self, position):
-        return False if self.boardStatus[position[0]][position[1]] == "-" else True
-
     def IsWinner(self, player):
         for i in range(len(self.boardStatus)):
             if self.boardStatus[i][0] == self.boardStatus[i][1] == self.boardStatus[i][2] == player:
@@ -74,6 +67,16 @@ class TicTacToe:
             return True
 
         return False
+
+    def IsBoardFilled(self):
+        for row in self.boardStatus:
+            for item in row:
+                if item == '-':
+                    return False
+        return True
+
+    def IsPositionOccupied(self, position):
+        return False if self.boardStatus[position[0]][position[1]] == "-" else True
 
     def IsGameover(self):
         self.Xwins = self.IsWinner('X')
@@ -174,6 +177,13 @@ class TicTacToe:
                 pass
         return corners
 
+    def EmptyEdges(self):
+        edges = []
+        for edge in self.edges:
+            if not self.IsPositionOccupied(edge):
+                edges.append(edge)
+        return edges
+
     def OppositeToComputerFirstCorner(self):
         if tuple(self.computerFirstCorner) in list(self.oppCornerDict.keys()):
             return list(self.oppCornerDict.get(tuple(self.computerFirstCorner)))
@@ -194,29 +204,43 @@ class TicTacToe:
             self.playerPlayAdjToComputer = True
             return True
 
+    def RandomPlay(self):
+        empty = []
+        for i in range(len(self.boardStatus)):
+            for j in range(len(self.boardStatus)):
+                if not self.IsPositionOccupied([i, j]):
+                    empty.append([i, j])
+        return random.choice(empty)
+
     def BestPlay(self):
-        if (self.boardStatus == np.full(shape=(3, 3), fill_value="-")).all():
-            self.computerFirstCorner = random.choice(self.EmptyCorners())
-            return self.computerFirstCorner
-        elif self.turn == 1 and self.DidPlayerPlayAdjToComputerFirstCorner():
-            return list(self.ansIfPlayerPlaysComputerCornerAdj.get(
-                (tuple(self.computerFirstCorner), tuple(self.playersLastMove))))
-        elif self.turn == 2 and self.playerPlayAdjToComputer:
-            print("true")
-            return [1, 1]
-        elif self.turn == 1 and (
-                self.playersLastMove == [1, 1] or self.DidPlayerPlayClosestCornerToComputerFirstCorner()):
-            return self.OppositeToComputerFirstCorner()
-        else:
-            return random.choice(self.EmptyCorners(removeOppositeCorner=True))
-        # else:
-        #     self.computerFirstCorner = random.choice(self.EmptyCorners())
-        #     return self.computerFirstCorner
-        # elif self.DidPlayerPlayOppositeCorner():
+        if self.computer == 'X':
+            if (self.boardStatus == np.full(shape=(3, 3), fill_value="-")).all():
+                self.computerFirstCorner = random.choice(self.EmptyCorners())
+                return self.computerFirstCorner
+            elif self.turn == 1 and (
+                    self.playersLastMove == [1, 1] or self.DidPlayerPlayClosestCornerToComputerFirstCorner()):
+                return self.OppositeToComputerFirstCorner()
+            elif self.turn == 1 and self.DidPlayerPlayAdjToComputerFirstCorner():
+                return list(self.ansIfPlayerPlaysComputerCornerAdj.get(
+                    (tuple(self.computerFirstCorner), tuple(self.playersLastMove))))
+            elif self.turn == 2 and self.playerPlayAdjToComputer:
+                return [1, 1]
+            else:
+                return random.choice(self.EmptyCorners(removeOppositeCorner=True))
+        elif self.computer == "O":
+            if self.turn == 1 and self.playersLastMove in self.corners:
+                self.isPlayerFirstMoveCorner = True
+                return [1, 1]
+            elif self.isPlayerFirstMoveCorner and self.turn == 2 and self.playersLastMove in self.corners:
+                return random.choice(self.EmptyEdges())
+            elif self.turn == 1 and self.playersLastMove == [1,1]:
+                return random.choice(self.EmptyCorners())
+            else:
+                return self.RandomPlay()
 
     def Computer(self):
         canComputerWin_PositionToWin = self.CanWin_PositionToWin(self.computer)
-        print("Can Computer Win:", canComputerWin_PositionToWin)
+        # print("Can Computer Win:", canComputerWin_PositionToWin)
         canPlayerWin_PositionToWin = self.CanWin_PositionToWin(self.player)
 
         if canComputerWin_PositionToWin[0]:
@@ -224,25 +248,18 @@ class TicTacToe:
         elif canPlayerWin_PositionToWin[0]:
             self.Move(canPlayerWin_PositionToWin[1], self.computer)
         else:
-            if self.computer == "X":
-                print("\ntrying")
-                position = self.BestPlay()
-                print("No error")
-                print("best calculated move:", position)
-                self.computersLastMove = position
-                self.Move(position, self.computer)
-            else:
-                print("indev")
-                self.WantToPlayAgain()
-            # position = [random.randrange(3), random.randrange(3)]
-            # while self.IsPositionOccupied(position):
-            #     position = [random.randrange(3), random.randrange(3)]
-            # self.Move(position, self.computer)
-
+            # print("\ntrying")
+            position = self.BestPlay()
+            # print("No error")
+            # print("best calculated move:", position)
+            self.computersLastMove = position
+            self.Move(position, self.computer)
     def Start(self):
         print("computer starts" if self.player == "O" else "player starts")
-
-        self.Display()
+        if self.computer == "X":
+            pass
+        else:
+            self.Display()
         while True:
             if self.player == "X":
                 self.Input()
