@@ -249,13 +249,15 @@ class TicTacToe:
             else:
                 return random.choice(self.EmptyCorners(removeOppositeCorner=True))
         elif self.computer == "O":
-            if self.turn == 1 and self.playersLastMove in self.corners:
+            if self.turn == 1 and ((self.playersLastMove in self.corners) or (self.playersLastMove in self.edges)):
                 self.isPlayerFirstMoveCorner = True
                 return [1, 1]
             elif self.isPlayerFirstMoveCorner and self.turn == 2 and self.playersLastMove in self.corners:
                 return random.choice(self.EmptyEdges())
             elif self.turn == 1 and self.playersLastMove == [1, 1]:
                 return random.choice(self.EmptyCorners())
+            elif self.turn == 1 and self.playersLastMove in self.edges:
+                return
             else:
                 return self.RandomPlay()
 
